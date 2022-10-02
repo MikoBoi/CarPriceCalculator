@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="static/css/style.css" rel="stylesheet">
+    <title>Meiirbek and Alibek's Price Predictor. FREE!</title>
+</head>
+<body>
+<header>
+	<div id="particles-js"></div>
+	<script type="text/javascript" src="static/js/particles.js"></script>
+	<script type="text/javascript" src="static/js/app.js"></script>
+</header>
+
+    <div class="container">
+    <h1>Көліктің бағасын болжау</h1>
+	<form method="POST" accept-charset=""utf-8>
+
+	<div class="form">
+	<label>Көліктің маркасы:</label>
+	<select class="select" id="marka" name="marka" required="1" onchange="load_car_models(this.id, 'car_model')">
+        {% for manufacturer in marka %}
+	<option value="{{ manufacturer }}">{{ manufacturer }}</option>
+        {% endfor %}
+    </select>
+	</div>
+
+	<div class="form">
+	<label>Көліктің моделі:</label>
+	<select class="select" id="car_model" name="car_model" required="1">
+	</select>
+    </div>
+
+    <div class="form">
+	<label>Жанармай типі:</label>
+	<select class="select" id="toplivo" name="toplivo" required="1">
+	    {% for fuel in toplivo %}
+	<option value="{{ fuel }}">{{ fuel }}</option>
+        {% endfor %}
+	</select>
+    </div>
+
+    <div class="form">
+	<label>Машинаның жағдайы:</label>
+	<select class="select" id="sostoianie" name="sostoianie" required="1">
+	    {% for condition in sostoianie %}
+	<option value="{{ condition }}">{{ condition }}</option>
+        {% endfor %}
+	</select>
+    </div>
+
+	<div class="form">
+	<label>Шығарылған жылы:</label>
+	<select class="select" id="god" name="god" required="1">
+	    {% for year in god %}
+	<option value="{{ year }}">{{ year }}</option>
+        {% endfor %}
+	</select>
+    </div>
+
+    <div class="form">
+	<label>Пробег:</label>
+    <input class="input" type="text" id="kms" name="kms" placeholder="Enter Drive KMs...">
+    </div>
+
+	<button class="reg" onclick="send_data()">Болжау</button>
+
+	</form>
+
+    <br>
+    <div class="row">
+    <h2><span id="prediction"></span></h2>
+    <h3><span id="greetings"></span></h3>
+    </div>
+
+	</div>
+
+<script>
+
+    function load_car_models(manufacturer_id, car_model_id)
+    {
+        var marka = document.getElementById(manufacturer_id);
+        var car_model = document.getElementById(car_model_id);
+        car_model.value=""
+        car_model.innerHTML=""
+        {% for manufacturer in marka %}
+            if(marka.value == "{{ manufacturer }}")
+            {
+                {% for model in model %}
+                    {% if manufacturer in model %}
+                        var newOption = document.createElement("option")
+                        newOption.value="{{ model }}"
+                        newOption.innerHTML="{{ model }}"
+                        car_model.options.add(newOption)
+                    {% endif %}
+                {% endfor %}
+            }
+        {% endfor %}
+    }
+
+    function form_handler(event)
+    {
+        event.preventDefault()
+    }
+
+    function send_data()
+    {
+        document.querySelector('form').addEventListener('submit', form_handler)
+        var fd = new FormData(document.querySelector('form'))
+        var xhr = new XMLHttpRequest()
+        xhr.open('POST', '/predict', true)
+        document.getElementById("prediction").innerHTML="Болжамдалуда...";
+        xhr.onreadystatechange = function()
+        {
+            if(xhr.readyState == XMLHttpRequest.DONE)
+            {
+                document.getElementById("prediction").innerHTML="Болжамдалған баға: $"+ xhr.responseText
+                document.getElementById("greetings").innerHTML="Назарыңызға рахмет!!!"
+            }
+        }
+        xhr.onlead=function(){};
+        xhr.send(fd);
+    }
+
+</script>
+
+</body>
+</html>
